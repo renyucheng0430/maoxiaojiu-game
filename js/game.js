@@ -19,6 +19,12 @@
     };
 
   // ===== 游戏设置（持久化到 localStorage） =====
+  // 画质预设（必须在 gameSettings 验证之前定义）
+  const QUALITY_PRESETS = {
+    high:   { pixelRatio: 2, shadowMap: 2048, antialias: true,  fogNear: 62,  fogFar: 255 },
+    medium: { pixelRatio: 1.5, shadowMap: 1024, antialias: true,  fogNear: 55,  fogFar: 200 },
+    low:    { pixelRatio: 1, shadowMap: 512,  antialias: false, fogNear: 45,  fogFar: 150 }
+  };
   const SETTINGS_KEY = 'mxj_settings_v1';
   let gameSettings = { quality: 'high', autosave: true, bgm: true, sfx: true };
   try {
@@ -29,12 +35,6 @@
   function saveSettings() {
     try { localStorage.setItem(SETTINGS_KEY, JSON.stringify(gameSettings)); } catch (e) {}
   }
-  // 画质预设
-  const QUALITY_PRESETS = {
-    high:   { pixelRatio: 2, shadowMap: 2048, antialias: true,  fogNear: 62,  fogFar: 255 },
-    medium: { pixelRatio: 1.5, shadowMap: 1024, antialias: true,  fogNear: 55,  fogFar: 200 },
-    low:    { pixelRatio: 1, shadowMap: 512,  antialias: false, fogNear: 45,  fogFar: 150 }
-  };
     try {
       localStorage.setItem(SAVE_KEY, JSON.stringify(data));
       return true;
@@ -743,9 +743,11 @@
     if (fb) fb.classList.add('show');
     updateLoadText("正在启动游戏", 3);
     setTimeout(() => {
-      if (!initThree()) return;
-      gameLoop();
-      showNotification('拖动屏幕可旋转视角（双击复位）；摇杆或WASD移动，靠近NPC按 E 或点击对话。');
+      try {
+        if (!initThree()) { updateLoadText("WebGL 初始化失败，请使用现代浏览器", 0); return; }
+        gameLoop();
+        showNotification("拖动屏幕可旋转视角（双击复位）；摇杆或WASD移动，靠近NPC按 E 或点击对话。");
+      } catch(err) { updateLoadText("初始化出错: " + err.message, 0); console.error(err); }
     }, 50);
 
     setupQuestPanel();
@@ -918,12 +920,10 @@
   function buildWorld() {
     updateLoadText("正在初始化 3D 引擎…", 5);
     groundMat = LM(0x86b356);
-    buildBackdrop();
-    buildTerrain();
-    buildRoadsAndWater();
-    updateLoadText("正在生成地形…", 20);
-    // 第一帧后继续加载
+    // 所有构建都异步分帧，避免阻塞主线程导致进度条卡住
     requestAnimationFrame(() => {
+        updateLoadText("正在生成地形…", 15);
+        buildBackdrop(); buildTerrain(); buildRoadsAndWater();
       updateLoadText('正在构建建筑…', 35);
       buildBuildings();
       buildVillageDetails();
