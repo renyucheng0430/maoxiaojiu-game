@@ -103,3 +103,5 @@ E:\猫小九\Game\
 25. 自动寻路系统：A*网格寻路(2单位格,8方向,斜向不穿墙)，点击地面自动走到目标点；点击远处NPC自动寻路过去并触发对话；目的地显示黄色旋转脉冲圆环标记；按WASD/推动摇杆立即取消寻路；路径自动简化(去共线点)；障碍格基于obstacles数组构建；仅室外生效。
 26. NPC随情节移动位置：7个阶段(before_test/testing/after_test/training/provocation/before_fight/after_fight)各有独立站位表；测试前后齐聚部落广场，苦修期妈妈回家其他人去学堂，挑衅期在学堂前，比武期齐聚练武场；每帧检测阶段变化并平滑插值移动(0.03 lerp)，精灵/影子/名牌/交互提示同步跟随。
 27. 全本地化+更新检查：启动页背景图从CDN下载到本地(assets/images/ui/splash_bg.jpg)，消除所有外部依赖；新增version.json版本文件；游戏启动前先显示更新检查界面，读取version.json获取update_url，连接远程版本对比，发现新版本弹出提示(立即更新/跳过)，无更新地址或检查失败则800ms后自动进入游戏；版本号比较支持多段数字。
+28. 分块加载优化：buildWorld()改为分帧异步加载，同步构建地形/背景/道路后，用requestAnimationFrame分4帧依次构建建筑→自然环境→道具装饰→动画元素，每帧更新加载进度百分比(35%→55%→75%→90%→100%)，避免长时间阻塞主线程导致浏览器假死。
+29. GitHub发布：git init(main分支)+.gitignore+92文件提交，SSH远程git@github.com:renyucheng0430/maoxiaojiu-game.git，HTTPS被网络重置改用SSH(22端口通)。
