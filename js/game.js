@@ -738,9 +738,15 @@
     dialogueText = $('dialogue-text');
     notification = $('notification');
 
-    if (!initThree()) return;   // WebGL 不可用时保留兜底提示
-    const fb = $('webgl-fallback');
-    if (fb) fb.classList.remove('show');
+    // 显示加载界面，异步初始化（避免黑屏）
+    const fb = $("webgl-fallback");
+    if (fb) fb.classList.add('show');
+    updateLoadText("正在启动游戏", 3);
+    setTimeout(() => {
+      if (!initThree()) return;
+      gameLoop();
+      showNotification('拖动屏幕可旋转视角（双击复位）；摇杆或WASD移动，靠近NPC按 E 或点击对话。');
+    }, 50);
 
     setupQuestPanel();
     setupMenuButtons();
@@ -753,9 +759,6 @@
     setBackdrop('road');
     renderQuests('main');
     $('quest-panel').classList.add('collapsed');  // 默认收起，不遮挡 3D 场景
-    gameLoop();
-
-    showNotification('拖动屏幕可旋转视角（双击复位）；摇杆或WASD移动，靠近NPC按 E 或点击对话。');
   }
 
   // ===== Three.js 场景 =====
@@ -913,10 +916,12 @@
   // 分块加载：避免长时间阻塞主线程
   let loadProgress = 0;
   function buildWorld() {
+    updateLoadText("正在初始化 3D 引擎…", 5);
     groundMat = LM(0x86b356);
     buildBackdrop();
     buildTerrain();
     buildRoadsAndWater();
+    updateLoadText("正在生成地形…", 20);
     // 第一帧后继续加载
     requestAnimationFrame(() => {
       updateLoadText('正在构建建筑…', 35);
@@ -965,11 +970,13 @@
   }
   function updateLoadText(msg, pct) {
     loadProgress = pct;
-    const fb = $('webgl-fallback');
-    if (fb) fb.textContent = msg + '（' + pct + '%）';
+    const fb = $("webgl-fallback");
+    if (fb) {
+      fb.innerHTML = "<div style=\"font-size:18px;margin-bottom:4px\">" + msg + "</div>" +
+        "<div class=\"load-bar-wrap\"><div class=\"load-bar\" style=\"width:" + pct + "%\"></div></div>" +
+        "<div class=\"load-pct\">" + pct + "%</div>";
+    }
   }
-
-  // 纯色天空穹幕（去掉地点加载页）
   function buildBackdrop() {
     backdropMat = new THREE.MeshBasicMaterial({ color: 0xa8d4f0, side: THREE.BackSide, fog: false, depthWrite: false });
     backdropCyl = makeMesh(new THREE.CylinderGeometry(236, 236, 150, 56, 1, true), backdropMat, false, false);
@@ -979,17 +986,17 @@
 
   function buildTerrain() {
     // 草地主贴图：草色 + 深浅草叶噪点
-    const grassTex = ctex(256, (ctx, s) => {
+    const grassTex = ctex(128, (ctx, s) => {
       const r = mulberry32(7);
       ctx.fillStyle = '#7faf55';
       ctx.fillRect(0, 0, s, s);
-      for (let i = 0; i < 2600; i++) {
+      for (let i = 0; i < 1000; i++) {
         const x = r() * s, y = r() * s;
         const g = 90 + Math.floor(r() * 70);
         ctx.fillStyle = `rgba(${40 + Math.floor(r() * 40)},${g + 40},${40 + Math.floor(r() * 30)},${0.18 + r() * 0.22})`;
         ctx.fillRect(x, y, 1 + r() * 2, 1 + r() * 2);
       }
-      for (let i = 0; i < 220; i++) {
+      for (let i = 0; i < 80; i++) {
         const x = r() * s, y = r() * s;
         ctx.strokeStyle = r() > 0.5 ? 'rgba(90,140,60,0.5)' : 'rgba(150,190,90,0.45)';
         ctx.lineWidth = 1;
@@ -1006,7 +1013,7 @@
     scene.add(inner);
 
     // 外围起伏山地（顶点着色：草坡 → 岩灰）
-    const SIZE = 360, SEG = 96;
+    const SIZE = 360, SEG = 64;
     const geo = new THREE.PlaneGeometry(SIZE, SIZE, SEG, SEG);
     geo.rotateX(-Math.PI / 2);
     const pos = geo.attributes.position;
@@ -1030,8 +1037,8 @@
 
     // 远山：多层蓝灰色峰峦，雾中与画卷融为一体
     const mountColors = [0x5f7a96, 0x52708e, 0x6b85a2, 0x48628a];
-    for (let i = 0; i < 30; i++) {
-      const a = (i / 30) * Math.PI * 2 + (wrng() - 0.5) * 0.22;
+    for (let i = 0; i < 18; i++) {
+      const a = (i / 18) * Math.PI * 2 + (wrng() - 0.5) * 0.22;
       const r = 82 + wrng() * 58;
       const h = 24 + wrng() * 40;
       const rad = 16 + wrng() * 15;
@@ -3163,13 +3170,14 @@
       overlay.style.display = 'none';
       callback();
     };
-    // 尝试读 version.json（file:// 下可能失败，失败则跳过）
-    try {
-      fetch('version.json', { cache: 'no-store' })
+    // file:// 下不能 fetch 本地文件，直接跳过；http(s) 下读取 version.json
+    if (location.protocol === "file:") { doCheck(); }
+    else {
+      fetch("version.json", { cache: "no-store" })
         .then(r => r.json())
-        .then(data => { updateUrl = data.update_url || ''; doCheck(); })
+        .then(data => { updateUrl = data.update_url || ""; doCheck(); })
         .catch(() => doCheck());
-    } catch (e) { doCheck(); }
+    }
   }
   function compareVersion(a, b) {
     const pa = String(a).split('.').map(Number), pb = String(b).split('.').map(Number);

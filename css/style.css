@@ -1740,3 +1740,14 @@ input:checked + .slider:before { transform: translateX(20px); }
 .update-btn:hover { background: #6b5535; }
 .update-btn-skip { background: #555; }
 .update-btn-skip:hover { background: #333; }
+
+/* 加载进度条 */
+#webgl-fallback .load-bar-wrap {
+  width: 280px; height: 8px; margin-top: 20px;
+  background: rgba(255,255,255,0.1); border-radius: 4px; overflow: hidden;
+}
+#webgl-fallback .load-bar {
+  height: 100%; width: 0%; background: linear-gradient(90deg, #ffcc00, #ff9900);
+  border-radius: 4px; transition: width 0.3s ease;
+}
+#webgl-fallback .load-pct { font-size: 13px; color: #aaa; margin-top: 8px; }
