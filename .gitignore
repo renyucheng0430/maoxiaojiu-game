@@ -1,0 +1,21 @@
+# 备份文件
+*.bak
+*.backup
+
+# 预览缓存
+.preview/
+*.preview
+
+# 系统文件
+Thumbs.db
+Desktop.ini
+.DS_Store
+
+# 编辑器
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# 日志
+*.log

@@ -1,0 +1,176 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+  <title>猫小九历险记 - 情景互动游戏</title>
+  <link rel="stylesheet" href="css/style.css">
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🐱</text></svg>">
+</head>
+<body>
+  <!-- ===== 启动页（点击进入游戏） ===== -->
+  <div id="splash-screen" title="点击进入游戏">
+    <img class="splash-bg" id="splash-bg" alt="" onerror="this.style.display='none'" src="assets/images/ui/splash_bg.jpg">
+    <div class="splash-vignette"></div>
+    <div class="splash-content">
+      <h1 class="splash-title">
+        <span class="splash-title-line">猫小九</span>
+        <span class="splash-title-line">历险记</span>
+      </h1>
+      <p class="splash-subtitle">改编自奇喵君同名有声故事《猫小九历险记》</p>
+      <p class="splash-enter">点击进入游戏</p>
+    </div>
+  </div>
+
+  <div id="game-container">
+
+    <!-- ===== 游戏世界（Three.js 3D 场景挂载点） ===== -->
+    <div id="game-world"></div>
+    <!-- WebGL 不可用时的兜底提示 -->
+    <div id="webgl-fallback">3D 场景初始化中……如果长时间黑屏，请使用现代浏览器并通过本地服务器（如 python -m http.server）打开本游戏。</div>
+    <!-- ===== 更新检查 ===== -->
+    <div id="update-overlay">
+      <div class="update-box">
+        <div class="update-spinner"></div>
+        <div class="update-text" id="update-text">正在检查更新…</div>
+        <div class="update-version" id="update-version"></div>
+        <div class="update-btns" id="update-btns" style="display:none;">
+          <button class="update-btn" id="update-now">立即更新</button>
+          <button class="update-btn update-btn-skip" id="update-skip">跳过</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- ===== 右上角任务面板 ===== -->
+    <div id="quest-panel">
+      <div class="quest-header" id="quest-header" title="点击收起/展开">
+        📜 任务日志 <span class="quest-chevron" id="quest-chevron">▼</span>
+      </div>
+      <div class="quest-tabs">
+        <button class="quest-tab active" data-type="main">⭐ 主线</button>
+        <button class="quest-tab" data-type="side">📋 支线</button>
+        <button class="quest-tab" data-type="challenge">⚔️ 挑战</button>
+      </div>
+      <div class="quest-content" id="quest-content">
+        <!-- 任务内容由JS渲染 -->
+      </div>
+    </div>
+
+    <!-- ===== 左侧菜单按钮 ===== -->
+    <div id="menu-buttons">
+      <button class="menu-btn" id="btn-bag" title="背包">
+        <span class="icon">🎒</span>
+        <span class="label">背包</span>
+      </button>
+      <button class="menu-btn" id="btn-profile" title="我的">
+        <span class="icon">👤</span>
+        <span class="label">我的</span>
+      </button>
+      <button class="menu-btn" id="btn-cultivation" title="修行">
+        <span class="icon">⚡</span>
+        <span class="label">修行</span>
+      </button>
+      <button class="menu-btn" id="btn-relationships" title="关系">
+        <span class="icon">💞</span>
+        <span class="label">关系</span>
+      </button>
+      <button class="menu-btn" id="btn-chapters" title="章节">
+        <span class="icon">📖</span>
+        <span class="label">章节</span>
+      </button>
+      <button class="menu-btn" id="btn-settings" title="设置">
+        <span class="icon">⚙️</span>
+        <span class="label">设置</span>
+      </button>
+    </div>
+
+    <!-- ===== 视角操作提示 ===== -->
+    <div id="view-hint">🖐 拖动屏幕旋转视角 · 双击复位</div>
+
+    <!-- ===== 虚拟摇杆 ===== -->
+    <div id="joystick-container">
+      <div id="joystick-base">
+        <div id="joystick-knob"></div>
+      </div>
+      <div class="joystick-hint">拖动移动 / WASD</div>
+    </div>
+
+    <!-- ===== 底部信息栏 ===== -->
+    <div id="bottom-bar">
+      <div class="player-info-mini">
+        <div class="player-avatar-mini"><img src="assets/images/sprites/xiaojiu.png" alt="猫小九"></div>
+        <div>
+          <div class="player-name-mini">猫小九</div>
+          <div class="player-level-mini">Lv.1 不到一星武者</div>
+        </div>
+      </div>
+      <div style="display:flex;align-items:center;gap:6px;">
+        <span class="bar-label">HP</span>
+        <div class="hp-bar"><div class="hp-fill" style="width:100%;"></div></div>
+      </div>
+      <div style="display:flex;align-items:center;gap:6px;">
+        <span class="bar-label">灵力</span>
+        <div class="sp-bar"><div class="sp-fill" style="width:30%;"></div></div>
+      </div>
+      <div class="location-display" id="location-name">📍 部落广场</div>
+    </div>
+
+    <!-- ===== 对话框 ===== -->
+    <div id="dialogue-box">
+      <img id="dialogue-portrait" src="" alt="角色头像">
+      <div class="dialogue-content">
+        <div class="dialogue-speaker" id="dialogue-speaker"></div>
+        <div class="dialogue-text" id="dialogue-text"></div>
+        <div class="dialogue-continue">▼ 点击 / 按 E 继续</div>
+      </div>
+    </div>
+
+    <!-- ===== 模态面板 ===== -->
+    <div id="modal-overlay">
+      <div class="modal-panel">
+        <div class="modal-header">
+          <span id="modal-title">面板</span>
+          <button class="modal-close" id="modal-close">✕</button>
+        </div>
+        <div class="modal-body" id="modal-body">
+          <!-- 内容由JS渲染 -->
+        </div>
+      </div>
+    </div>
+
+    <!-- ===== 漫画查看器 ===== -->
+    <div id="comic-viewer">
+      <div class="comic-nav-top">
+        <div class="comic-chapter-title" id="comic-chapter-title"></div>
+        <button class="comic-close-btn" id="comic-close">✕</button>
+      </div>
+      <div class="comic-image-container">
+        <img id="comic-image" src="" alt="漫画页">
+      </div>
+      <div class="comic-nav-bottom">
+        <button class="comic-nav-btn" id="comic-prev">◀ 上一页</button>
+        <span class="comic-page-indicator" id="comic-page-indicator">1 / 1</span>
+        <button class="comic-nav-btn" id="comic-next">下一页 ▶</button>
+      </div>
+    </div>
+
+    <!-- ===== 通知 ===== -->
+    <div id="notification"></div>
+
+    <!-- ===== 场景切换 ===== -->
+    <div id="scene-transition">
+      <div class="scene-transition-text" id="scene-transition-text"></div>
+      <div class="scene-transition-sub" id="scene-transition-sub"></div>
+    </div>
+
+  </div>
+
+  <!-- ===== 脚本 ===== -->
+  <script src="lib/three.min.js"></script>
+  <script src="assets/data/sprites-data.js"></script>
+  <script src="assets/data/backdrops-data.js"></script>
+  <script src="assets/data/props-data.js?v=20260928"></script>
+  <script src="assets/data/game-data.js"></script>
+  <script src="js/game.js?v=20261016"></script>
+</body>
+</html>
