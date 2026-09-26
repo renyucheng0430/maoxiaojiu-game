@@ -3202,15 +3202,70 @@
     const splash = $('splash-screen');
     if (splash) { splash.classList.add('splash-hide'); setTimeout(() => splash.remove(), 800); }
   }
+  // 动态加载大体积数据文件（角色/道具/背景 base64），显示进度
+  let dataLoadProgress = 0;
+  function loadDataFiles(callback) {
+    const files = [
+      { src: "assets/data/sprites-data.js?v=20261006", name: "角色立绘", size: "5.7MB" },
+      { src: "assets/data/backdrops-data.js?v=20260928", name: "背景画卷", size: "1.9MB" },
+      { src: "assets/data/props-data.js?v=20260928", name: "场景道具", size: "3.8MB" }
+    ];
+    let loaded = 0;
+    const total = files.length;
+    function updateBoot(msg, pct) {
+      dataLoadProgress = pct;
+      const bt = document.getElementById("boot-text");
+      const bb = document.getElementById("boot-bar");
+      const bp = document.getElementById("boot-pct");
+      if (bt) bt.textContent = msg;
+      if (bb) bb.style.width = pct + "%";
+      if (bp) bp.textContent = pct + "%";
+    }
+    files.forEach((f, idx) => {
+      // 检查是否已加载（兼容本地直接引用）
+      if ((f.src.includes("sprites") && typeof SPRITE_DATA !== "undefined") ||
+          (f.src.includes("backdrops") && typeof BACKDROP_DATA !== "undefined") ||
+          (f.src.includes("props") && typeof PROPS_DATA !== "undefined")) {
+        loaded++;
+        if (loaded >= total) { hideBoot(); callback(); }
+        return;
+      }
+      const s = document.createElement("script");
+      s.src = f.src;
+      s.onload = () => {
+        loaded++;
+        const pct = Math.round((loaded / total) * 60) + 5;  // 5%~65% 是数据加载
+        updateBoot("已加载 " + f.name + " (" + f.size + ")", pct);
+        if (loaded >= total) {
+          setTimeout(() => { hideBoot(); callback(); }, 200);
+        }
+      };
+      s.onerror = () => {
+        updateBoot("加载失败: " + f.name + "，请刷新重试", 0);
+      };
+      document.head.appendChild(s);
+    });
+    // 超时看门狗：60秒还没加载完提示
+    setTimeout(() => {
+      if (loaded < total) {
+        updateBoot("加载较慢（已" + loaded + "/" + total + "），网络不佳请耐心等待或检查网络", Math.round((loaded/total)*60)+5);
+      }
+    }, 30000);
+  }
+  function hideBoot() {
+    const bl = document.getElementById("boot-loader");
+    if (bl) { bl.style.transition = "opacity 0.5s"; bl.style.opacity = "0"; setTimeout(() => bl.remove(), 500); }
+  }
   function bootstrap() {
     if (typeof THREE === "undefined") { showFallback(); return; }
-    // 先检查更新，再显示启动页
-    startUpdateCheck(() => {
-      const splash = $("splash-screen");
-      if (splash) { splash.addEventListener("click", enterGame); }
-      else init();
-      // 兜底：800ms 后自动进入
-      setTimeout(() => { if (!updateCheckDone) return; if (!splash || !splash.parentNode) return; enterGame(); }, 800);
+    // 先加载大体积数据文件，再检查更新，再进入游戏
+    loadDataFiles(() => {
+      startUpdateCheck(() => {
+        const splash = $("splash-screen");
+        if (splash) { splash.addEventListener("click", enterGame); }
+        else init();
+        setTimeout(() => { if (!updateCheckDone) return; if (!splash || !splash.parentNode) return; enterGame(); }, 800);
+      });
     });
   }
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', bootstrap);

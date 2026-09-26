@@ -8,6 +8,15 @@
   <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🐱</text></svg>">
 </head>
 <body>
+  <!-- 纯HTML加载界面（JS加载前立即可见） -->
+  <div id="boot-loader" style="position:fixed;inset:0;z-index:99999;display:flex;flex-direction:column;align-items:center;justify-content:center;background:radial-gradient(ellipse at center,#2a1a08,#0a0501);color:#f0e6d2;font-family:'Microsoft YaHei',sans-serif;text-align:center;">
+    <div style="font-size:56px;margin-bottom:16px;">🐱</div>
+    <div id="boot-text" style="font-size:18px;margin-bottom:12px;">猫小九历险记</div>
+    <div style="width:260px;height:6px;background:rgba(255,255,255,0.1);border-radius:3px;overflow:hidden;">
+      <div id="boot-bar" style="height:100%;width:0%;background:linear-gradient(90deg,#ffcc00,#ff9900);border-radius:3px;transition:width 0.3s;"></div>
+    </div>
+    <div id="boot-pct" style="font-size:13px;color:#999;margin-top:8px;">正在加载游戏资源…</div>
+  </div>
   <!-- ===== 启动页（点击进入游戏） ===== -->
   <div id="splash-screen" title="点击进入游戏">
     <img class="splash-bg" id="splash-bg" alt="" onerror="this.style.display='none'" src="assets/images/ui/splash_bg.jpg">
