@@ -728,43 +728,51 @@
   }
   // ===== 初始化 =====
   function init() {
-    questContent = $('quest-content');
-    modalOverlay = $('modal-overlay');
-    modalBody = $('modal-body');
-    comicViewer = $('comic-viewer');
-    comicImage = $('comic-image');
-    dialogueBox = $('dialogue-box');
-    dialogueSpeaker = $('dialogue-speaker');
-    dialogueText = $('dialogue-text');
-    notification = $('notification');
+    questContent = $("quest-content");
+    modalOverlay = $("modal-overlay");
+    modalBody = $("modal-body");
+    comicViewer = $("comic-viewer");
+    comicImage = $("comic-image");
+    dialogueBox = $("dialogue-box");
+    dialogueSpeaker = $("dialogue-speaker");
+    dialogueText = $("dialogue-text");
+    notification = $("notification");
 
-    // 显示加载界面，异步初始化（避免黑屏）
+    // 显示加载界面
     const fb = $("webgl-fallback");
-    if (fb) fb.classList.add('show');
+    if (fb) fb.classList.add("show");
     updateLoadText("正在启动游戏", 3);
-    setTimeout(() => {
-      try {
-        if (!initThree()) { updateLoadText("WebGL 初始化失败，请使用现代浏览器", 0); return; }
-        gameLoop();
-        showNotification("拖动屏幕可旋转视角（双击复位）；摇杆或WASD移动，靠近NPC按 E 或点击对话。");
-      } catch(err) { updateLoadText("初始化出错: " + err.message, 0); console.error(err); }
-    }, 50);
 
-    setupQuestPanel();
-    setupMenuButtons();
-    setupJoystick();
-    setupKeyboard();
-    setupComicViewer();
-    setupModal();
-    setupSettingsPanel();
-    updateLocationDisplay();
-    setBackdrop('road');
-    renderQuests('main');
-    $('quest-panel').classList.add('collapsed');  // 默认收起，不遮挡 3D 场景
+    // 先让浏览器画出3%，再开始重活
+    requestAnimationFrame(() => {
+      requestAnimationFrame(() => {
+        try {
+          if (!initThree()) { updateLoadText("WebGL 初始化失败，请使用 Chrome/Edge/Firefox 现代浏览器", 0); return; }
+          // UI 设置（轻量，放在3D之后）
+          setupQuestPanel();
+          setupMenuButtons();
+          setupJoystick();
+          setupKeyboard();
+          setupComicViewer();
+          setupModal();
+          setupSettingsPanel();
+          updateLocationDisplay();
+          setBackdrop("road");
+          renderQuests("main");
+          $("quest-panel").classList.add("collapsed");
+          gameLoop();
+          showNotification("拖动屏幕可旋转视角（双击复位）；摇杆或WASD移动，靠近NPC按 E 或点击对话。");
+        } catch(err) {
+          updateLoadText("初始化出错: " + err.message, 0);
+          console.error("INIT ERROR:", err);
+        }
+      });
+    });
   }
 
   // ===== Three.js 场景 =====
   function initThree() {
+    updateLoadText("正在初始化 WebGL 图形引擎…", 8);
     const world = $('game-world');
     try {
       renderer = new THREE.WebGLRenderer({ antialias: QUALITY_PRESETS[gameSettings.quality].antialias });
@@ -774,6 +782,7 @@
     }
     renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, QUALITY_PRESETS[gameSettings.quality].pixelRatio));
     world.appendChild(renderer.domElement);
+    updateLoadText("正在创建 3D 场景…", 12);
 
     scene = new THREE.Scene();
     scene.background = new THREE.Color(0xcfe2ee);
