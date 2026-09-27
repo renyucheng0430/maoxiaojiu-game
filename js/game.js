@@ -3242,7 +3242,9 @@
     ];
     let loaded = 0;
     const bar = document.getElementById('splash-progress');
+    if (bar) bar.classList.remove('splash-progress-anim');
     const txt = document.getElementById('splash-enter-text');
+    if (txt) txt.dataset.jsReady = '1';
     files.forEach((f) => {
       if ((f.src.includes('sprites') && typeof SPRITE_DATA !== 'undefined') ||
           (f.src.includes('backdrops') && typeof BACKDROP_DATA !== 'undefined') ||

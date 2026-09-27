@@ -6,8 +6,21 @@
   <title>猫小九历险记 - 情景互动游戏</title>
   <link rel="stylesheet" href="css/style.css">
   <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🐱</text></svg>">
-</head>
+<style>
+/* 启动页进度条纯CSS动画（大文件下载期间也能动） */
+@keyframes splashLoad { 0%{width:5%} 30%{width:35%} 60%{width:60%} 85%{width:80%} 100%{width:85%} }
+.splash-progress-anim { animation: splashLoad 8s ease-out forwards; }
+</style></head>
 <body>
+<script>
+// 大文件下载期间的提示（不依赖game.js）
+(function(){
+  var t=document.getElementById('splash-enter-text');
+  var msgs=['正在加载游戏资源…','加载中，请稍候…','资源较大，网络不佳时请耐心等待…'];
+  var i=0;
+  if(t){t.textContent=msgs[0];setInterval(function(){i=(i+1)%msgs.length;if(t&&!t.dataset.jsReady)t.textContent=msgs[i];},4000);}
+})();
+</script>
   
     <div id="boot-text" style="font-size:18px;margin-bottom:12px;">猫小九历险记</div>
     <div style="width:260px;height:6px;background:rgba(255,255,255,0.1);border-radius:3px;overflow:hidden;">
