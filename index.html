@@ -173,11 +173,9 @@
   </div>
 
   <!-- ===== 脚本 ===== -->
-  <script src="lib/three.min.js"></script>
-  <script src="assets/data/sprites-data.js"></script>
-  <script src="assets/data/backdrops-data.js"></script>
-  <script src="assets/data/props-data.js?v=20260928"></script>
-  <script src="assets/data/game-data.js"></script>
-  <script src="js/game.js?v=20261031"></script>
+  <!-- ===== 脚本（大文件由game.js动态加载） ===== -->
+  <script defer src="lib/three.min.js"></script>
+  <script defer src="assets/data/game-data.js"></script>
+  <script defer src="js/game.js?v=20261101"></script>
 </body>
 </html>
