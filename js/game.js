@@ -3202,9 +3202,46 @@
     const splash = $('splash-screen');
     if (splash) { splash.classList.add('splash-hide'); setTimeout(() => splash.remove(), 800); }
   }
+  // 安卓设备检测 + 本地文件提示
+  function checkAndroid() {
+    const ua = navigator.userAgent.toLowerCase();
+    const isAndroid = ua.indexOf("android") > -1;
+    const isLocal = location.protocol === "file:";
+    if (isAndroid && isLocal) {
+      const tip = document.getElementById("android-tip");
+      if (tip) tip.style.display = "flex";
+    }
+  }
+  // 启动页象征进度条动画
+  let splashProgressTimer = null;
+  function startSplashProgress() {
+    const bar = document.getElementById("splash-progress");
+    const txt = document.getElementById("splash-enter-text");
+    if (!bar) return;
+    let p = 0;
+    bar.style.width = "0%";
+    // 象征性推进：快→慢→等待
+    splashProgressTimer = setInterval(() => {
+      if (p < 25) p += 3;
+      else if (p < 55) p += 1.5;
+      else if (p < 82) p += 0.6;
+      else p = 82;  // 停在82%等游戏就绪
+      bar.style.width = p + "%";
+    }, 120);
+  }
+  function finishSplashProgress() {
+    const bar = document.getElementById("splash-progress");
+    const txt = document.getElementById("splash-enter-text");
+    if (bar) bar.style.width = "100%";
+    if (txt) txt.textContent = "点击进入游戏";
+    if (splashProgressTimer) { clearInterval(splashProgressTimer); splashProgressTimer = null; }
+  }
   function bootstrap() {
     if (typeof THREE === "undefined") { showFallback(); return; }
+    checkAndroid();
+    startSplashProgress();
     const splash = $("splash-screen");
+    finishSplashProgress();
     if (splash) { splash.addEventListener("click", enterGame); }
     else init();
     setTimeout(() => { if (!splash || !splash.parentNode) return; enterGame(); }, 800);
