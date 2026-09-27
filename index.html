@@ -28,9 +28,12 @@
     </div>
     <div id="boot-pct" style="font-size:13px;color:#999;margin-top:8px;">正在加载游戏资源…</div>
   </div>
-  <!-- ===== 启动页（点击进入游戏） ===== -->
+  <!-- ===== 启动页（视频在上，进度条在下） ===== -->
   <div id="splash-screen" title="点击进入游戏">
-    <img class="splash-bg" id="splash-bg" alt="" onerror="this.style.display='none'" src="assets/images/ui/splash_bg.jpg">
+    <video class="splash-video" id="splash-video" autoplay loop muted playsinline>
+      <source src="assets/video/trailer.mp4" type="video/mp4">
+    </video>
+    <div class="splash-sound-tip" id="splash-sound-tip">🔊 点击开启声音</div>
     <div class="splash-vignette"></div>
     <div class="splash-content">
       <h1 class="splash-title">
@@ -38,7 +41,13 @@
         <span class="splash-title-line">历险记</span>
       </h1>
       <p class="splash-subtitle">改编自奇喵君同名有声故事《猫小九历险记》</p>
-      <p class="splash-enter">点击进入游戏</p>
+    </div>
+    <div class="splash-version">v1.0.0</div>
+    <div class="splash-bottom">
+      <div class="splash-progress-wrap">
+        <div class="splash-progress-bar splash-progress-anim" id="splash-progress"></div>
+      </div>
+      <p class="splash-enter" id="splash-enter-text">正在加载游戏资源…</p>
     </div>
   </div>
 
