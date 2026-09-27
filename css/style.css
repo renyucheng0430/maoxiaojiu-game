@@ -1696,6 +1696,7 @@ body {
   backdrop-filter: blur(4px);
 }
 .splash-sound-tip:hover { background: rgba(0,0,0,0.7); }
+.splash-version { position:absolute; bottom:12px; left:16px; z-index:5; color:rgba(255,255,255,0.4); font-size:12px; font-family:monospace; }
 .splash-bottom {
   position: absolute;
   bottom: 40px;

@@ -3235,11 +3235,11 @@
   function bootstrap() {
     if (typeof THREE === "undefined") { showFallback(); return; }
     checkAndroid();
-    setupSplashVideoSound();
     startSplashProgress();
-    const splash = $("splash-screen");
+    setupSplashVideoSound();
+    const splash = splash-screen;
     finishSplashProgress();
-    if (splash) { splash.addEventListener("click", enterGame); }
+    if (splash) { splash.addEventListener('click', enterGame); }
     else init();
     setTimeout(() => { if (!splash || !splash.parentNode) return; enterGame(); }, 800);
   }
