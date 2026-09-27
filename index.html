@@ -185,8 +185,12 @@
 
   <!-- ===== 脚本 ===== -->
   <!-- ===== 脚本（大文件由game.js动态加载） ===== -->
+  <!-- ===== 脚本（全部defer并行下载，HTML立即渲染） ===== -->
   <script defer src="lib/three.min.js"></script>
+  <script defer src="assets/data/sprites-data.js"></script>
+  <script defer src="assets/data/backdrops-data.js"></script>
+  <script defer src="assets/data/props-data.js?v=20260928"></script>
   <script defer src="assets/data/game-data.js"></script>
-  <script defer src="js/game.js?v=20261102"></script>
+  <script defer src="js/game.js?v=20261103"></script>
 </body>
 </html>

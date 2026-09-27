@@ -3200,53 +3200,19 @@
     if (txt) txt.textContent = "点击进入游戏";
     if (splashProgressTimer) { clearInterval(splashProgressTimer); splashProgressTimer = null; }
   }
-  // 动态加载大体积数据文件
-  let dataFilesLoaded = false;
-  function loadLargeDataFiles(onDone) {
-    const files = [
-      { src: 'assets/data/sprites-data.js', name: '角色立绘' },
-      { src: 'assets/data/backdrops-data.js', name: '背景画卷' },
-      { src: 'assets/data/props-data.js?v=20260928', name: '场景道具' }
-    ];
-    let loaded = 0;
-    const bar = document.getElementById('splash-progress');
-    if (bar) bar.classList.remove('splash-progress-anim');
-    const txt = document.getElementById('splash-enter-text');
-    if (txt) txt.dataset.jsReady = '1';
-    files.forEach((f) => {
-      if ((f.src.includes('sprites') && typeof SPRITE_DATA !== 'undefined') ||
-          (f.src.includes('backdrops') && typeof BACKDROP_DATA !== 'undefined') ||
-          (f.src.includes('props') && typeof PROPS_DATA !== 'undefined')) {
-        loaded++; checkDone(); return;
-      }
-      const s = document.createElement('script');
-      s.src = f.src;
-      s.onload = () => { loaded++; checkDone(); };
-      s.onerror = () => { loaded++; checkDone(); };
-      document.head.appendChild(s);
-    });
-    function checkDone() {
-      const pct = Math.round((loaded / files.length) * 85) + 5;
-      if (bar) bar.style.width = pct + '%';
-      if (txt) txt.textContent = '加载中(' + loaded + '/' + files.length + ')';
-      if (loaded >= files.length) {
-        dataFilesLoaded = true;
-        if (bar) bar.style.width = '100%';
-        if (txt) txt.textContent = '点击进入游戏';
-        onDone();
-      }
-    }
-  }
   function bootstrap() {
     if (typeof THREE === 'undefined') { showFallback(); return; }
     checkAndroid();
     setupSplashVideoSound();
+    // 接管启动页进度条（去掉CSS动画，显示真实进度）
+    const bar = document.getElementById('splash-progress');
+    const txt = document.getElementById('splash-enter-text');
+    if (bar) { bar.classList.remove('splash-progress-anim'); bar.style.width = '95%'; }
+    if (txt) { txt.dataset.jsReady = '1'; txt.textContent = '点击进入游戏'; }
     const splash = splash-screen;
-    loadLargeDataFiles(() => {
-      if (splash) { splash.addEventListener('click', enterGame); }
-      else init();
-      setTimeout(() => { if (!splash || !splash.parentNode) return; enterGame(); }, 800);
-    });
+    if (splash) { splash.addEventListener('click', enterGame); }
+    else init();
+    setTimeout(() => { if (!splash || !splash.parentNode) return; enterGame(); }, 800);
   }
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', bootstrap);
   else bootstrap();
