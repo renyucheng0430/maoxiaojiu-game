@@ -3135,38 +3135,6 @@
   // ===== 启动（先显示启动页，点击后进入游戏） =====
   // ===== 更新检查 =====
   const LOCAL_VERSION = GAME_VERSION;
-  let updateCheckDone = false;
-  function startUpdateCheck(callback) {
-    const overlay = $('update-overlay');
-    if (!overlay) { callback(); return; }
-    overlay.style.display = 'flex';
-    const text = $('update-text');
-    const verEl = $('update-version');
-    if (text) text.textContent = '正在检查更新…';
-    if (verEl) verEl.textContent = '当前版本：' + LOCAL_VERSION;
-    let finished = false;
-    function finish() {
-      if (finished) return;
-      finished = true;
-      updateCheckDone = true;
-      overlay.style.display = 'none';
-      callback();
-    }
-    // 硬超时：3秒内没检查完就直接进入游戏，不再卡
-    setTimeout(finish, 3000);
-    // file:// 下直接跳过；http(s) 下尝试读 version.json（带超时）
-    if (location.protocol === "file:") { setTimeout(finish, 600); return; }
-    const controller = new AbortController();
-    const tid = setTimeout(() => controller.abort(), 2500);
-    fetch("version.json", { signal: controller.signal, cache: "no-store" })
-      .then(r => r.json())
-      .then(data => {
-        clearTimeout(tid);
-        if (text) text.textContent = '已是最新版本';
-        setTimeout(finish, 500);
-      })
-      .catch(() => { clearTimeout(tid); finish(); });
-  }
   function compareVersion(a, b) {
     const pa = String(a).split('.').map(Number), pb = String(b).split('.').map(Number);
     for (let i = 0; i < Math.max(pa.length, pb.length); i++) {

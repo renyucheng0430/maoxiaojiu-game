@@ -58,17 +58,6 @@
     <!-- WebGL 不可用时的兜底提示 -->
     <div id="webgl-fallback">3D 场景初始化中……如果长时间黑屏，请使用现代浏览器并通过本地服务器（如 python -m http.server）打开本游戏。</div>
     <!-- ===== 更新检查 ===== -->
-    <div id="update-overlay">
-      <div class="update-box">
-        <div class="update-spinner"></div>
-        <div class="update-text" id="update-text">正在检查更新…</div>
-        <div class="update-version" id="update-version"></div>
-        <div class="update-btns" id="update-btns" style="display:none;">
-          <button class="update-btn" id="update-now">立即更新</button>
-          <button class="update-btn update-btn-skip" id="update-skip">跳过</button>
-        </div>
-      </div>
-    </div>
 
     <!-- ===== 右上角任务面板 ===== -->
     <div id="quest-panel">
@@ -198,6 +187,6 @@
   <!-- ===== 脚本（大文件由game.js动态加载） ===== -->
   <script defer src="lib/three.min.js"></script>
   <script defer src="assets/data/game-data.js"></script>
-  <script defer src="js/game.js?v=20261101"></script>
+  <script defer src="js/game.js?v=20261102"></script>
 </body>
 </html>
