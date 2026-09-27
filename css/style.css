@@ -1681,6 +1681,21 @@ body {
   border-bottom: 1px solid rgba(245,196,104,0.75);
   box-shadow: 0 0 24px rgba(0,0,0,0.65);
 }
+.splash-sound-tip {
+  position: absolute;
+  top: 20px;
+  right: 20px;
+  z-index: 6;
+  background: rgba(0,0,0,0.5);
+  color: #fff;
+  padding: 6px 14px;
+  border-radius: 20px;
+  font-size: 13px;
+  cursor: pointer;
+  transition: opacity 0.3s;
+  backdrop-filter: blur(4px);
+}
+.splash-sound-tip:hover { background: rgba(0,0,0,0.7); }
 .splash-bottom {
   position: absolute;
   bottom: 40px;

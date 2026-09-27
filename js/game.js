@@ -3203,6 +3203,23 @@
     if (splash) { splash.classList.add('splash-hide'); setTimeout(() => splash.remove(), 800); }
   }
   // 安卓设备检测 + 本地文件提示
+  // 启动页视频声音控制：首次点击后开启声音
+  function setupSplashVideoSound() {
+    const video = document.getElementById("splash-video");
+    const tip = document.getElementById("splash-sound-tip");
+    const splash = document.getElementById("splash-screen");
+    if (!video) return;
+    // 尝试自动播放（静音）
+    video.play().catch(() => {});
+    function enableSound() {
+      video.muted = false;
+      video.volume = 0.7;
+      video.play().catch(() => {});
+      if (tip) { tip.style.opacity = "0"; setTimeout(() => tip.remove(), 300); }
+    }
+    if (tip) tip.addEventListener("click", (e) => { e.stopPropagation(); enableSound(); });
+    if (splash) splash.addEventListener("click", enableSound, { once: true });
+  }
   function checkAndroid() {
     const ua = navigator.userAgent.toLowerCase();
     const isAndroid = ua.indexOf("android") > -1;
@@ -3239,6 +3256,7 @@
   function bootstrap() {
     if (typeof THREE === "undefined") { showFallback(); return; }
     checkAndroid();
+    setupSplashVideoSound();
     startSplashProgress();
     const splash = $("splash-screen");
     finishSplashProgress();
