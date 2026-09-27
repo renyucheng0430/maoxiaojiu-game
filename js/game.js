@@ -3138,55 +3138,34 @@
   let updateCheckDone = false;
   function startUpdateCheck(callback) {
     const overlay = $('update-overlay');
-    const text = $('update-text');
-    const verEl = $('update-version');
-    const btns = $('update-btns');
     if (!overlay) { callback(); return; }
     overlay.style.display = 'flex';
-    text.textContent = '正在检查更新…';
-    verEl.textContent = '当前版本：' + LOCAL_VERSION;
-    // 尝试读取本地 version.json 获取更新地址
-    let updateUrl = '';
-    const doCheck = () => {
-      if (!updateUrl) { finishCheck(false); return; }
-      text.textContent = '正在连接更新服务器…';
-      const controller = new AbortController();
-      const timeoutId = setTimeout(() => controller.abort(), 5000);
-      fetch(updateUrl, { signal: controller.signal, cache: 'no-store' })
-        .then(r => r.json())
-        .then(remote => {
-          clearTimeout(timeoutId);
-          const remoteVer = remote.version || '';
-          if (remoteVer && compareVersion(remoteVer, LOCAL_VERSION) > 0) {
-            text.textContent = '发现新版本：' + remoteVer;
-            verEl.textContent = '当前版本：' + LOCAL_VERSION + ' → 最新版本：' + remoteVer;
-            if (remote.release_notes) verEl.textContent += '\n更新内容：' + remote.release_notes;
-            btns.style.display = 'flex';
-            $('update-now').onclick = () => {
-              if (remote.update_url) window.open(remote.update_url, '_blank');
-              finishCheck(true);
-            };
-            $('update-skip').onclick = () => finishCheck(false);
-          } else {
-            text.textContent = '已是最新版本';
-            setTimeout(() => finishCheck(false), 800);
-          }
-        })
-        .catch(() => { clearTimeout(timeoutId); text.textContent = '更新检查失败，将进入游戏'; setTimeout(() => finishCheck(false), 800); });
-    };
-    const finishCheck = (updated) => {
+    const text = $('update-text');
+    const verEl = $('update-version');
+    if (text) text.textContent = '正在检查更新…';
+    if (verEl) verEl.textContent = '当前版本：' + LOCAL_VERSION;
+    let finished = false;
+    function finish() {
+      if (finished) return;
+      finished = true;
       updateCheckDone = true;
       overlay.style.display = 'none';
       callback();
-    };
-    // file:// 下不能 fetch 本地文件，直接跳过；http(s) 下读取 version.json
-    if (location.protocol === "file:") { doCheck(); }
-    else {
-      fetch("version.json", { cache: "no-store" })
-        .then(r => r.json())
-        .then(data => { updateUrl = data.update_url || ""; doCheck(); })
-        .catch(() => doCheck());
     }
+    // 硬超时：3秒内没检查完就直接进入游戏，不再卡
+    setTimeout(finish, 3000);
+    // file:// 下直接跳过；http(s) 下尝试读 version.json（带超时）
+    if (location.protocol === "file:") { setTimeout(finish, 600); return; }
+    const controller = new AbortController();
+    const tid = setTimeout(() => controller.abort(), 2500);
+    fetch("version.json", { signal: controller.signal, cache: "no-store" })
+      .then(r => r.json())
+      .then(data => {
+        clearTimeout(tid);
+        if (text) text.textContent = '已是最新版本';
+        setTimeout(finish, 500);
+      })
+      .catch(() => { clearTimeout(tid); finish(); });
   }
   function compareVersion(a, b) {
     const pa = String(a).split('.').map(Number), pb = String(b).split('.').map(Number);
