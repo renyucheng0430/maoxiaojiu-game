@@ -780,7 +780,7 @@
       showFallback();
       return false;
     }
-    renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, QUALITY_PRESETS[gameSettings.quality].pixelRatio));
+    renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, q.pixelRatio));
     world.appendChild(renderer.domElement);
     updateLoadText("正在创建 3D 场景…", 12);
 
@@ -801,7 +801,7 @@
     sun.position.set(36, 56, 26);
     sun.castShadow = true;
     sun.shadow.mapSize.set(2048, 2048);
-    sun.shadow.mapSize.set(QUALITY_PRESETS[gameSettings.quality].shadowMap, QUALITY_PRESETS[gameSettings.quality].shadowMap);
+    sun.shadow.mapSize.set(q.shadowMap, q.shadowMap);
     sun.shadow.camera.top = 64; sun.shadow.camera.bottom = -64;
     sun.shadow.camera.near = 8; sun.shadow.camera.far = 170;
     sun.shadow.bias = -0.0006;
